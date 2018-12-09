@@ -165,6 +165,7 @@ describe('ui-select tests', function () {
       if (attrs.title !== undefined) { attrsHtml += ' title="' + attrs.title + '"'; }
       if (attrs.appendToBody !== undefined) { attrsHtml += ' append-to-body="' + attrs.appendToBody + '"'; }
       if (attrs.allowClear !== undefined) { matchAttrsHtml += ' allow-clear="' + attrs.allowClear + '"'; }
+      if (attrs.allowFreeText !== undefined) { attrsHtml += ' allow-free-text="' + attrs.allowFreeText + '"';}
       if (attrs.inputId !== undefined) { attrsHtml += ' input-id="' + attrs.inputId + '"'; }
       if (attrs.ngClass !== undefined) { attrsHtml += ' ng-class="' + attrs.ngClass + '"'; }
       if (attrs.resetSearchInput !== undefined) { attrsHtml += ' reset-search-input="' + attrs.resetSearchInput + '"'; }
@@ -680,6 +681,28 @@ describe('ui-select tests', function () {
     $(el).scope().$select.select("I don't exist");
 
     expect($(el).scope().$select.selected).toEqual("I don't exist");
+  });
+  
+  it('should allow free text editing if the attribute says so', function() {
+    var el = createUiSelect({allowFreeText: true});
+    clickMatch(el);
+     var searchInput = el.find('.ui-select-search');
+    setSearchText(el, 'someKindOfFreeTextForBlurEvent');
+    searchInput.blur();
+    expect($(el).scope().$select.selected).toEqual('someKindOfFreeTextForBlurEvent');
+     clickMatch(el);
+    setSearchText(el, 'someKindOfFreeTextForTabKeydown');
+    triggerKeydown(searchInput, Key.Tab);
+    expect($(el).scope().$select.selected).toEqual('someKindOfFreeTextForTabKeydown');
+  });
+  
+   it('should not allow a non existing item on TAB keydown', function() {
+    var el = createUiSelect();
+    clickMatch(el);
+     var searchInput = el.find('.ui-select-search');
+    setSearchText(el, 'someKindOfFreeTextForBlurEvent');
+    triggerKeydown(searchInput, Key.Tab);
+     expect($(el).scope().$select.selected).not.toBeDefined();
   });
 
   it('should format new items using the tagging function when the attribute is a function', function () {
