@@ -15,6 +15,7 @@ uis.controller('uiSelectCtrl',
   ctrl.placeholder = uiSelectConfig.placeholder;
   ctrl.searchEnabled = uiSelectConfig.searchEnabled;
   ctrl.sortable = uiSelectConfig.sortable;
+  ctrl.allowFreeText = uiSelectConfig.allowFreeText;
   ctrl.refreshDelay = uiSelectConfig.refreshDelay;
   ctrl.paste = uiSelectConfig.paste;
   ctrl.resetSearchInput = uiSelectConfig.resetSearchInput;
@@ -610,6 +611,18 @@ uis.controller('uiSelectCtrl',
     }
     return processed;
   }
+    
+  function _handleBlurAndTab() {
+    if (ctrl.allowFreeText && ctrl.search) { // Make sure that the search is not empty, otherwise the blur event will override the tab keydown event
+      ctrl.select(ctrl.search);
+      ctrl.close();
+      ctrl.search = EMPTY_SEARCH;
+    }
+  }
+    
+  ctrl.searchInput.on('blur', function() {
+    _handleBlurAndTab();
+  });
 
   // Bind to keyboard shortcuts
   ctrl.searchInput.on('keydown', function(e) {
@@ -648,7 +661,13 @@ uis.controller('uiSelectCtrl',
               }
               if (newItem) ctrl.select(newItem, true);
             });
-          }
+          } else if(~[KEY.ESC,KEY.TAB].indexOf(key)){
+              if (!ctrl.allowFreeText) {
+                 ctrl.close();
+               } else {
+                  _handleBlurAndTab();
+              }
+           }
         }
       }
 
